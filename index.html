@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECT416 Modern Communication Systems • Study Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
+        
+        body { font-family: 'Inter', system_ui, sans-serif; }
+        .title-font { font-family: 'Space Grotesk', sans-serif; }
+        .table-row {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .table-row:hover {
+            background-color: #1f2937;
+            transform: translateX(4px);
+        }
+        .table-row.completed {
+            opacity: 0.65;
+        }
+        .question-text {
+            transition: all 0.3s ease;
+        }
+        .table-row.completed .question-text {
+            text-decoration: line-through;
+            color: #9ca3af;
+        }
+        .progress-bar {
+            transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .tab-active {
+            border-bottom: 3px solid #00d4ff;
+            color: white;
+        }
+        .paper-tag {
+            display: inline-block;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 9999px;
+            background: #334155;
+            color: #e2e8f0;
+            margin-right: 4px;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-200 min-h-screen">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <!-- HEADER -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="title-font text-4xl font-semibold text-white flex items-center gap-3">
+                    <i class="fa-solid fa-satellite-dish text-[#00d4ff]"></i>
+                    ECT416 Modern Communication Systems
+                </h1>
+                <p class="text-xl text-gray-400 mt-1">Full Study Planner – Theory + Numerical + Derivations</p>
+                <p class="text-sm text-gray-500 mt-2">Based on complete question database • Repeated &amp; reworded questions clearly labeled • Auto-save progress</p>
+            </div>
+            <button onclick="resetAllProgress()"
+                    class="flex items-center gap-2 px-5 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-2xl text-sm font-medium transition-colors">
+                <i class="fa-solid fa-trash-can"></i>
+                <span>Reset All Progress</span>
+            </button>
+        </div>
+
+        <!-- TABS -->
+        <div class="flex border-b border-gray-800 mb-6 overflow-x-auto">
+            <button onclick="switchTab(0)" id="tab-0"
+                    class="tab-active flex-1 md:flex-none px-8 py-4 text-lg font-medium flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-book"></i>
+                Theory Questions
+            </button>
+            <button onclick="switchTab(1)" id="tab-1"
+                    class="flex-1 md:flex-none px-8 py-4 text-lg font-medium flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-calculator"></i>
+                Numerical Questions
+            </button>
+            <button onclick="switchTab(2)" id="tab-2"
+                    class="flex-1 md:flex-none px-8 py-4 text-lg font-medium flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-pen-to-square"></i>
+                Derivation Questions
+            </button>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div class="grid grid-cols-3 gap-4 mb-8" id="dashboard">
+            <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-400 text-sm" id="dashboard-title">Total Theory Questions</p>
+                        <p id="total-questions" class="text-5xl font-semibold text-white mt-2">68</p>
+                    </div>
+                    <i class="fa-solid fa-list-check text-[#00d4ff] text-4xl opacity-20"></i>
+                </div>
+                <div class="mt-4 h-2 bg-gray-800 rounded-2xl overflow-hidden">
+                    <div id="progress-bar" class="progress-bar h-2 bg-gradient-to-r from-[#00d4ff] to-cyan-400 rounded-2xl" style="width: 0%"></div>
+                </div>
+                <p id="progress-text" class="text-sm text-gray-400 mt-2 flex justify-between">
+                    <span>0 completed</span><span>0%</span>
+                </p>
+            </div>
+            <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-400 text-sm">Total Marks</p>
+                        <p id="total-marks" class="text-5xl font-semibold text-white mt-2">380</p>
+                    </div>
+                    <i class="fa-solid fa-calculator text-emerald-400 text-4xl opacity-20"></i>
+                </div>
+                <p id="marks-completed" class="text-emerald-400 text-sm font-medium mt-6">0 marks completed</p>
+            </div>
+            <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-400 text-sm">High Priority</p>
+                        <p id="high-priority-count" class="text-5xl font-semibold text-amber-400 mt-2">12</p>
+                    </div>
+                    <i class="fa-solid fa-fire text-amber-400 text-4xl opacity-20"></i>
+                </div>
+                <p class="text-xs text-amber-400/80 mt-6">Repeated / reworded questions • Solve first</p>
+            </div>
+        </div>
+
+        <!-- FILTERS -->
+        <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 mb-8">
+            <div class="flex flex-wrap gap-4 items-end">
+                <div class="flex-1 min-w-[280px]">
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Search Question</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                        <input id="search-input" type="text" placeholder="Search any part of the question..."
+                               onkeyup="applyFilters()"
+                               class="w-full bg-gray-800 border border-gray-700 focus:border-[#00d4ff] rounded-2xl py-4 pl-11 pr-6 text-white placeholder:text-gray-500 outline-none">
+                    </div>
+                </div>
+                <div class="min-w-[140px]">
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Module</label>
+                    <select id="module-filter" onchange="applyFilters()"
+                            class="w-full bg-gray-800 border border-gray-700 text-white rounded-2xl py-4 px-5 outline-none">
+                        <option value="">All Modules</option>
+                        <option value="1">Module 1</option>
+                        <option value="2">Module 2</option>
+                        <option value="3">Module 3</option>
+                        <option value="4">Module 4</option>
+                        <option value="5">Module 5</option>
+                    </select>
+                </div>
+                <div class="min-w-[140px]">
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Marks</label>
+                    <select id="marks-filter" onchange="applyFilters()"
+                            class="w-full bg-gray-800 border border-gray-700 text-white rounded-2xl py-4 px-5 outline-none">
+                        <option value="">All Marks</option>
+                        <option value="3">3 marks</option>
+                        <option value="5">5 marks</option>
+                        <option value="6">6 marks</option>
+                        <option value="7">7 marks</option>
+                        <option value="8">8 marks</option>
+                        <option value="9">9 marks</option>
+                        <option value="14">14 marks</option>
+                    </select>
+                </div>
+                <div class="min-w-[220px]">
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Paper</label>
+                    <select id="paper-filter" onchange="applyFilters()"
+                            class="w-full bg-gray-800 border border-gray-700 text-white rounded-2xl py-4 px-5 outline-none">
+                        <option value="">All Papers</option>
+                        <option value="Jun 2023">Jun 2023</option>
+                        <option value="May 2024">May 2024</option>
+                        <option value="Apr 2025">Apr 2025</option>
+                        <option value="Sep 2025">Sep 2025</option>
+                    </select>
+                </div>
+                <div class="min-w-[160px]">
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Repetition</label>
+                    <div class="flex gap-2">
+                        <button onclick="toggleRepetitionFilter(0)" id="rep-all" class="filter-btn active px-6 py-4 bg-gray-800 hover:bg-gray-700 rounded-2xl text-sm font-medium flex-1">All</button>
+                        <button onclick="toggleRepetitionFilter(1)" id="rep-1" class="filter-btn px-6 py-4 bg-gray-800 hover:bg-gray-700 rounded-2xl text-sm font-medium flex-1">Once</button>
+                        <button onclick="toggleRepetitionFilter(2)" id="rep-2" class="filter-btn px-6 py-4 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 rounded-2xl text-sm font-medium flex-1"><i class="fa-solid fa-fire mr-1"></i>Repeated</button>
+                    </div>
+                </div>
+                <button onclick="clearFilters()" class="px-8 py-4 text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 rounded-2xl text-sm font-medium transition-colors">Clear Filters</button>
+            </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="bg-gray-900 border border-gray-800 rounded-3xl overflow-hidden">
+            <table class="w-full" id="questions-table">
+                <thead>
+                    <tr class="border-b border-gray-800">
+                        <th class="text-left py-5 px-8 font-medium text-gray-400 text-sm w-12">STATUS</th>
+                        <th class="text-left py-5 px-8 font-medium text-gray-400 text-sm">COMPLETE QUESTION</th>
+                        <th class="text-left py-5 px-8 font-medium text-gray-400 text-sm w-20">MODULE</th>
+                        <th class="text-left py-5 px-8 font-medium text-gray-400 text-sm w-20">MARKS</th>
+                        <th class="text-left py-5 px-8 font-medium text-gray-400 text-sm">PAPERS</th>
+                        <th class="text-left py-5 px-8 font-medium text-gray-400 text-sm w-20">REP</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body" class="text-sm divide-y divide-gray-800"></tbody>
+            </table>
+        </div>
+        <div class="flex justify-between items-center mt-6 text-xs text-gray-500 px-2">
+            <div id="filtered-count">Showing all questions</div>
+            <div class="flex items-center gap-6">
+                <div><i class="fa-solid fa-circle-check text-emerald-400"></i> <span id="completed-count">0</span> completed</div>
+                <div class="h-3 w-px bg-gray-700"></div>
+                <div>Progress saved automatically in your browser • Based on official ECT416 question database</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====================== PAPER LABELS ======================
+        const PAPER_LABELS = {
+            "Jun23": "Jun 2023",
+            "May24": "May 2024",
+            "Apr25": "Apr 2025",
+            "Sep25": "Sep 2025"
+        };
+
+        // ====================== THEORY QUESTIONS (68 entries from DB) ======================
+        let theoryQuestions = [
+            { id: 1, module: 1, marks: 3, part: "A", papers: ["Jun23"], repetition: 1, question: "Explain why OFDM is preferred over FDM in modern communication systems.", completed: false },
+            { id: 2, module: 1, marks: 3, part: "A", papers: ["Jun23"], repetition: 1, question: "Explain how Doppler shift is an important consideration in the design and operation of modern wireless communication systems.", completed: false },
+            { id: 3, module: 1, marks: 3, part: "A", papers: ["May24"], repetition: 1, question: "What is shadowing and how can it be modelled in mobile communication?", completed: false },
+            { id: 4, module: 1, marks: 3, part: "A", papers: ["May24"], repetition: 2, question: "List the benefits of a multi-carrier communication system over a single carrier communication system.", completed: false },
+            { id: 5, module: 1, marks: 3, part: "A", papers: ["Apr25"], repetition: 1, question: "Define OFDM and explain its basic principle with the help of neat diagram.", completed: false },
+            { id: 6, module: 1, marks: 3, part: "A", papers: ["Apr25"], repetition: 1, question: "Define path loss and mention factors affecting it.", completed: false },
+            { id: 7, module: 1, marks: 3, part: "A", papers: ["Sep25"], repetition: 1, question: "Describe the different diversity techniques used to improve signal reliability.", completed: false },
+            { id: 8, module: 1, marks: 3, part: "A", papers: ["Sep25"], repetition: 2, question: "Explain the benefits of a multi-carrier communication system over a single carrier communication system.", completed: false },
+            { id: 9, module: 1, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "Draw and explain the OFDM architecture showing how OFDM modulation and demodulation works.", completed: false },
+            { id: 10, module: 1, marks: 7, part: "B", papers: ["Jun23","Apr25"], repetition: 2, question: "Draw and explain the SC-FDMA transmitter and receiver structure / schematic.", completed: false },
+            { id: 11, module: 1, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "What are the benefits of multicarrier transmission? Explain how the orthogonality of subcarriers is maintained in OFDM.", completed: false },
+            { id: 12, module: 1, marks: 7, part: "B", papers: ["May24","Apr25"], repetition: 2, question: "What is the cyclic prefix code? Why is it used in OFDM? / Draw and explain the OFDM architecture with Cyclic Prefix.", completed: false },
+            { id: 13, module: 1, marks: 7, part: "B", papers: ["May24","Sep25"], repetition: 2, question: "Explain PAPR in OFDM systems.", completed: false },
+            { id: 14, module: 1, marks: 7, part: "B", papers: ["May24","Apr25"], repetition: 2, question: "Classify the diversity used in wireless communication.", completed: false },
+            { id: 15, module: 1, marks: 9, part: "B", papers: ["Sep25"], repetition: 1, question: "Explain the block diagram of OFDM transmitter and receiver.", completed: false },
+            { id: 16, module: 1, marks: 5, part: "B", papers: ["Sep25"], repetition: 2, question: "Explain PAPR in OFDM systems.", completed: false },
+            { id: 17, module: 1, marks: 9, part: "B", papers: ["Sep25"], repetition: 1, question: "Describe free space propagation model in wireless communication.", completed: false },
+            { id: 18, module: 1, marks: 5, part: "B", papers: ["Sep25"], repetition: 1, question: "Explain OFDMA and describe its working principle.", completed: false },
+            { id: 19, module: 2, marks: 3, part: "A", papers: ["Jun23"], repetition: 1, question: "Explain what is millimetre wave communication and mention its advantages?", completed: false },
+            { id: 20, module: 2, marks: 3, part: "A", papers: ["Jun23"], repetition: 1, question: "Mention three 6G use cases and their technologies.", completed: false },
+            { id: 21, module: 2, marks: 3, part: "A", papers: ["May24"], repetition: 2, question: "List and explain any three characteristics of millimeter waves.", completed: false },
+            { id: 22, module: 2, marks: 3, part: "A", papers: ["May24"], repetition: 1, question: "Discuss the major advantages and limitations of 6G Networks.", completed: false },
+            { id: 23, module: 2, marks: 3, part: "A", papers: ["Apr25"], repetition: 2, question: "List and explain any three characteristics of millimeter waves.", completed: false },
+            { id: 24, module: 2, marks: 3, part: "A", papers: ["Apr25"], repetition: 1, question: "Explain 3GPP-LTE standard.", completed: false },
+            { id: 25, module: 2, marks: 3, part: "A", papers: ["Sep25"], repetition: 1, question: "List the main challenges associated with utilizing a 60 GHz channel for millimeter-wave communication.", completed: false },
+            { id: 26, module: 2, marks: 3, part: "A", papers: ["Sep25"], repetition: 1, question: "(Implied in Sep25 Q13b) Explain various technologies in 6G network.", completed: false },
+            { id: 27, module: 2, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "Define IEEE 802.11. Write short notes on IEEE 802.11 standards (802.11a/b/g/n/ac/ax).", completed: false },
+            { id: 28, module: 2, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "Explain the HiperLAN technology and differentiate between HiperLAN type 1 and type 2.", completed: false },
+            { id: 29, module: 2, marks: 6, part: "B", papers: ["Jun23"], repetition: 1, question: "Explain three indoor and outdoor applications of millimeter wave communication.", completed: false },
+            { id: 30, module: 2, marks: 8, part: "B", papers: ["Jun23"], repetition: 1, question: "What are some potential applications for 60 GHz wireless communication? Mention challenges associated with implementing 60 GHz in real-world scenarios.", completed: false },
+            { id: 31, module: 2, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Compare the characteristics of IEEE 802.15.1, IEEE 802.15.3 and IEEE 802.15.4 WPAN standards.", completed: false },
+            { id: 32, module: 2, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Explain the IEEE 802.11 standard for WLAN. Compare the features of various derivatives of IEEE 802.11 standard.", completed: false },
+            { id: 33, module: 2, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Explain the features of all versions of HIPERLAN.", completed: false },
+            { id: 34, module: 2, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "Explain IEEE 802.15.3 High-Rate WPAN and IEEE 802.15.4 Low-Rate WPAN.", completed: false },
+            { id: 35, module: 2, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "Define IEEE 802.11. Write short notes on each of the following IEEE 802.11 standards (802.11a/b/g/n/ac/ax).", completed: false },
+            { id: 36, module: 2, marks: 8, part: "B", papers: ["Apr25"], repetition: 1, question: "Explain the architecture and working of WiMAX (IEEE 802.16a) technology.", completed: false },
+            { id: 37, module: 2, marks: 6, part: "B", papers: ["Apr25"], repetition: 1, question: "Detail the applications and purposes of 6G technology.", completed: false },
+            { id: 38, module: 2, marks: 9, part: "B", papers: ["Sep25"], repetition: 1, question: "Describe IEEE 802.11 System Architecture in detail with neat diagram.", completed: false },
+            { id: 39, module: 2, marks: 5, part: "B", papers: ["Sep25"], repetition: 1, question: "Explain any three indoor and outdoor applications of millimeter wave communication. Explain various technologies in 6G network.", completed: false },
+            { id: 40, module: 2, marks: 9, part: "B", papers: ["Sep25"], repetition: 1, question: "Write notes on (i) WiFi (ii) Hiper LAN (iii) WiMAX.", completed: false },
+            { id: 41, module: 2, marks: 5, part: "B", papers: ["Sep25"], repetition: 1, question: "Explain the various technologies in 6G networks.", completed: false },
+            { id: 42, module: 3, marks: 3, part: "A", papers: ["Jun23"], repetition: 1, question: "Compare the IoT connectivity technologies Zigbee and Wireless HART.", completed: false },
+            { id: 43, module: 3, marks: 3, part: "A", papers: ["Jun23"], repetition: 1, question: "Differentiate between MQTT and CoAP protocols in IoT.", completed: false },
+            { id: 44, module: 3, marks: 3, part: "A", papers: ["May24"], repetition: 1, question: "List and explain any three characteristics of IPv6.", completed: false },
+            { id: 45, module: 3, marks: 3, part: "A", papers: ["May24","Sep25"], repetition: 2, question: "Explain the request-response communication model used in IoT systems.", completed: false },
+            { id: 46, module: 3, marks: 3, part: "A", papers: ["Apr25"], repetition: 1, question: "Define the Internet of Things (IoT) and explain any two of its key characteristics.", completed: false },
+            { id: 47, module: 3, marks: 3, part: "A", papers: ["Apr25"], repetition: 1, question: "What's the difference between active and passive RFID?", completed: false },
+            { id: 48, module: 3, marks: 3, part: "A", papers: ["Sep25"], repetition: 2, question: "Explain the request-response communication model used in IoT systems.", completed: false },
+            { id: 49, module: 3, marks: 3, part: "A", papers: ["Sep25"], repetition: 1, question: "Explain the CoAP protocol and its role in enabling communication between IoT devices.", completed: false },
+            { id: 50, module: 3, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "Describe the architecture of healthcare IoT system with the help of a diagram.", completed: false },
+            { id: 51, module: 3, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "Describe the infrastructure protocols IPv6 and 6LoWPAN. Also explain the difference between the two.", completed: false },
+            { id: 52, module: 3, marks: 8, part: "B", papers: ["Jun23"], repetition: 1, question: "What is the physical design of an IoT system and what are its key components, explain with a diagram.", completed: false },
+            { id: 53, module: 3, marks: 6, part: "B", papers: ["Jun23"], repetition: 1, question: "Explain the key enabling technologies that make IoT possible. How does cloud computing enable IoT devices to store, process, and analyze large amounts of data?", completed: false },
+            { id: 54, module: 3, marks: 7, part: "B", papers: ["May24","Apr25"], repetition: 2, question: "Briefly describe the architecture of healthcare IoT systems.", completed: false },
+            { id: 55, module: 3, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Explain cloud Computing. What are the service models and deployment models in cloud computing?", completed: false },
+            { id: 56, module: 3, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Distinguish between the MQTT and CoAP communication protocols used in IoT systems.", completed: false },
+            { id: 57, module: 3, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "With appropriate diagram, describe the architecture of the Vehicular IoT system.", completed: false },
+            { id: 58, module: 3, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "Explain the principle of operation of MQTT data protocol employed in IoT networks.", completed: false },
+            { id: 59, module: 3, marks: 8, part: "B", papers: ["Apr25"], repetition: 1, question: "Explain cloud Computing. What are the service models in cloud computing?", completed: false },
+            { id: 60, module: 3, marks: 6, part: "B", papers: ["Apr25"], repetition: 1, question: "What is the physical design of an IoT system and what are its key components, explain with a diagram.", completed: false },
+            { id: 61, module: 3, marks: 9, part: "B", papers: ["Sep25"], repetition: 1, question: "Define cloud computing and explain the different service models and deployment models used in cloud computing.", completed: false },
+            { id: 62, module: 3, marks: 5, part: "B", papers: ["Sep25"], repetition: 1, question: "Explain the Wireless HART protocol and its role in industrial IoT communication.", completed: false },
+            { id: 63, module: 3, marks: 9, part: "B", papers: ["Sep25"], repetition: 1, question: "Explain various protocols used in IoT communication technologies.", completed: false },
+            { id: 64, module: 3, marks: 5, part: "B", papers: ["Sep25"], repetition: 1, question: "Explain the LoRa technology and its role in IoT applications.", completed: false },
+            { id: 65, module: 4, marks: 3, part: "A", papers: ["Jun23"], repetition: 1, question: "What are some potential drawbacks or limitations of DSRC?", completed: false },
+            { id: 66, module: 4, marks: 3, part: "A", papers: ["Jun23"], repetition: 1, question: "Mention the advantages of VLC standard in vehicular communication.", completed: false },
+            { id: 67, module: 4, marks: 3, part: "A", papers: ["May24"], repetition: 1, question: "List the major application areas and challenges of WAVE.", completed: false },
+            { id: 68, module: 4, marks: 3, part: "A", papers: ["May24","Apr25","Sep25"], repetition: 3, question: "Explain the DSRC standards for vehicular communication.", completed: false },
+            { id: 69, module: 4, marks: 3, part: "A", papers: ["Apr25"], repetition: 1, question: "What is the Intelligent Transport System (ITS) and how does it revolutionize transportation?", completed: false },
+            { id: 70, module: 4, marks: 3, part: "A", papers: ["Sep25"], repetition: 1, question: "What are the advantages of the VLC standard over other communication standards in vehicular communication?", completed: false },
+            { id: 71, module: 4, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "Explain the architecture of connected autonomous vehicles in 6G with the help of a diagram.", completed: false },
+            { id: 72, module: 4, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "Explain what is IEEE 802.11p and how does it differ from other IEEE 802.11 wireless communication standards?", completed: false },
+            { id: 73, module: 4, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "What is Visible Light Communication (VLC)? Explain various applications of VLC technology in vehicular communication.", completed: false },
+            { id: 74, module: 4, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "What are the benefits of CAVs? Describe how collision avoidance can be achieved through vehicular communication.", completed: false },
+            { id: 75, module: 4, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Describe how collision avoidance can be achieved through vehicular communication.", completed: false },
+            { id: 76, module: 4, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Explain the main advantages and limitations of IEEE 802.11p standard compared to cellular communication in connected autonomous vehicles.", completed: false },
+            { id: 77, module: 4, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "With the help of a diagram, explain the architecture of ITS system utilizing VLC standard for V2X communication.", completed: false },
+            { id: 78, module: 4, marks: 7, part: "B", papers: ["May24","Apr25"], repetition: 2, question: "Explain the key components of connected autonomous vehicles in 6G communications with the help of a diagram.", completed: false },
+            { id: 79, module: 4, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "Explain IEEE 1609 standard and its sub-variants used in vehicular communication.", completed: false },
+            { id: 80, module: 4, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "With the help of necessary figures, describe how collision avoidance can be achieved through vehicular communication.", completed: false },
+            { id: 81, module: 4, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "Explain the architecture of connected autonomous vehicles in 6G with the help of a diagram.", completed: false },
+            { id: 82, module: 4, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "Discuss Dedicated Short-Range Communication (DSRC) in vehicular networks. List out its advantages and disadvantages.", completed: false },
+            { id: 83, module: 4, marks: 9, part: "B", papers: ["Sep25"], repetition: 1, question: "Explain the IEEE 1609 standard and its role in vehicular communication systems. Include relevant diagrams.", completed: false },
+            { id: 84, module: 4, marks: 5, part: "B", papers: ["Sep25"], repetition: 1, question: "With the help of necessary diagrams, explain how collision avoidance can be achieved through vehicular communication.", completed: false },
+            { id: 85, module: 4, marks: 9, part: "B", papers: ["Sep25"], repetition: 1, question: "With the help of necessary diagrams, explain the architecture of ITS system utilizing VLC standard for V2X communication.", completed: false },
+            { id: 86, module: 4, marks: 5, part: "B", papers: ["Sep25"], repetition: 1, question: "List and explain any five advantages of Visible Light Communication (VLC).", completed: false },
+            { id: 87, module: 5, marks: 3, part: "A", papers: ["Jun23","Apr25","Sep25"], repetition: 3, question: "What are the specifications of a receiver in SDR?", completed: false },
+            { id: 88, module: 5, marks: 3, part: "A", papers: ["Jun23"], repetition: 1, question: "What are the basic components of an SDR system?", completed: false },
+            { id: 89, module: 5, marks: 3, part: "A", papers: ["May24"], repetition: 1, question: "Explain the issues with zero IF receiver architecture for Software Defined Radio.", completed: false },
+            { id: 90, module: 5, marks: 3, part: "A", papers: ["May24","Apr25","Sep25"], repetition: 3, question: "Define cognitive radio and explain its significance / list its benefits.", completed: false },
+            { id: 91, module: 5, marks: 3, part: "A", papers: ["Sep25"], repetition: 1, question: "List and explain any six key receiver specifications of a Software-Defined Radio (SDR).", completed: false },
+            { id: 92, module: 5, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "What are some common applications of SDR systems, and how does the use of SDR enable greater flexibility in communication systems?", completed: false },
+            { id: 93, module: 5, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "Explain the concept of cognitive radio. What are the benefits of spectrum sharing in cognitive radio?", completed: false },
+            { id: 94, module: 5, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "How does a software radio architecture work, and what are its components?", completed: false },
+            { id: 95, module: 5, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "What are the key features and benefits of cognitive radio technology? How does spectrum subleasing work in cognitive radio networks?", completed: false },
+            { id: 96, module: 5, marks: 7, part: "B", papers: ["May24","Apr25"], repetition: 2, question: "Describe spectrum subleasing and sharing in cognitive radio.", completed: false },
+            { id: 97, module: 5, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "List and explain the main specifications for SDR transmitter and receiver.", completed: false },
+            { id: 98, module: 5, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "With the help of necessary diagram, explain the low IF receiver architecture for SDR.", completed: false },
+            { id: 99, module: 5, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Discuss the functions of software adaptable networks (SAN) in cognitive networks.", completed: false },
+            { id: 100, module: 5, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "Discuss the architecture of SDR with a suitable block diagram.", completed: false },
+            { id: 101, module: 5, marks: 7, part: "B", papers: ["Apr25"], repetition: 2, question: "Describe spectrum subleasing and sharing in cognitive radio.", completed: false },
+            { id: 102, module: 5, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "List and explain the advantages and disadvantages of direct Conversion architectures for SDR receiver.", completed: false },
+            { id: 103, module: 5, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "Briefly explain the Multiple conversion receiver architecture for SDR.", completed: false },
+            { id: 104, module: 5, marks: 14, part: "B", papers: ["Sep25"], repetition: 1, question: "Explain the block diagram of the transmitter and receiver sections of a Software-Defined Radio (SDR).", completed: false },
+            { id: 105, module: 5, marks: 9, part: "B", papers: ["Sep25"], repetition: 2, question: "Describe spectrum subleasing and spectrum sharing in cognitive radio.", completed: false },
+            { id: 106, module: 5, marks: 5, part: "B", papers: ["Sep25"], repetition: 1, question: "With the help of necessary diagram, explain the low IF receiver architecture for SDR.", completed: false }
+        ];
+
+        // ====================== NUMERICAL QUESTIONS (4 entries from DB) ======================
+        let numericalQuestions = [
+            { id: 201, module: 1, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Determine the speed of a vehicle approaching an antenna if it experiences a maximum Doppler frequency shift of 70 Hz at 900 MHz.", completed: false },
+            { id: 202, module: 1, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "A mobile subscriber travels at 60 km/h. Compute the time between fades for a cellphone at 900 MHz and a PCS phone at 1900 MHz.", completed: false },
+            { id: 203, module: 1, marks: 3, part: "A", papers: ["Sep25"], repetition: 1, question: "Compute the maximum speed of a vehicle experiencing a maximum Doppler frequency shift of 90 Hz at 900 MHz.", completed: false },
+            { id: 204, module: 2, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Using Friis free space equation, compare the path loss at 500 meters for carrier frequencies of 1.8 GHz and 2.4 GHz.", completed: false }
+        ];
+
+        // ====================== DERIVATION QUESTIONS (1 entry from DB) ======================
+        let derivationQuestions = [
+            { id: 301, module: 1, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "Explain the concept of two ray ground reflection model and derive an expression for the total electric field of the two rays.", completed: false }
+        ];
+
+        let currentTab = 0; // 0 = Theory, 1 = Numerical, 2 = Derivation
+
+        function getCurrentQuestions() {
+            if (currentTab === 0) return theoryQuestions;
+            if (currentTab === 1) return numericalQuestions;
+            return derivationQuestions;
+        }
+
+        function loadProgress() {
+            const key = ['ect416_theory_progress', 'ect416_numerical_progress', 'ect416_derivation_progress'][currentTab];
+            const saved = localStorage.getItem(key);
+            if (saved) {
+                const completedIds = JSON.parse(saved);
+                getCurrentQuestions().forEach(q => q.completed = completedIds.includes(q.id));
+            }
+        }
+
+        function saveProgress() {
+            const key = ['ect416_theory_progress', 'ect416_numerical_progress', 'ect416_derivation_progress'][currentTab];
+            const completedIds = getCurrentQuestions().filter(q => q.completed).map(q => q.id);
+            localStorage.setItem(key, JSON.stringify(completedIds));
+        }
+
+        function calculateStats() {
+            const qs = getCurrentQuestions();
+            const completed = qs.filter(q => q.completed);
+            const totalCompleted = completed.length;
+            const totalCompletedMarks = completed.reduce((sum, q) => sum + q.marks, 0);
+            const totalMarks = qs.reduce((sum, q) => sum + q.marks, 0);
+            const progress = Math.round((totalCompleted / qs.length) * 100) || 0;
+
+            document.getElementById('total-questions').textContent = qs.length;
+            document.getElementById('total-marks').textContent = totalMarks;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('progress-text').innerHTML = `<span>${totalCompleted} completed</span><span>${progress}%</span>`;
+            document.getElementById('marks-completed').innerHTML = `<span class="font-semibold">${totalCompletedMarks}</span> / ${totalMarks} marks completed`;
+            document.getElementById('completed-count').textContent = totalCompleted;
+
+            // High priority = repeated (rep >= 2)
+            const highPriority = qs.filter(q => q.repetition >= 2).length;
+            document.getElementById('high-priority-count').textContent = highPriority;
+
+            // Update dashboard title
+            const titles = ["Total Theory Questions", "Total Numerical Questions", "Total Derivation Questions"];
+            document.getElementById('dashboard-title').textContent = titles[currentTab];
+        }
+
+        function renderTable(filteredQuestions) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            if (filteredQuestions.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-gray-400"><i class="fa-solid fa-magnifying-glass text-4xl mb-3 block"></i>No questions match your filters</td></tr>`;
+                return;
+            }
+            filteredQuestions.forEach(q => {
+                const papersHtml = q.papers.map(p => {
+                    const label = PAPER_LABELS[p] || p;
+                    return `<span class="paper-tag">${label}</span>`;
+                }).join('');
+                const row = document.createElement('tr');
+                row.className = `table-row ${q.completed ? 'completed' : ''}`;
+                row.innerHTML = `
+                    <td class="py-5 px-8">
+                        <input type="checkbox" ${q.completed ? 'checked' : ''} onchange="toggleComplete(${q.id}, this.checked)" class="w-5 h-5 accent-[#00d4ff] cursor-pointer">
+                    </td>
+                    <td class="py-5 px-8 pr-12">
+                        <div class="question-text text-gray-200 leading-relaxed">${q.question}</div>
+                        <div class="text-xs text-gray-500 mt-1 flex items-center gap-2">
+                            <span class="px-2 py-0.5 bg-gray-800 rounded-lg">Part ${q.part}</span>
+                        </div>
+                    </td>
+                    <td class="py-5 px-8 font-medium">Module ${q.module}</td>
+                    <td class="py-5 px-8 font-semibold text-[#00d4ff]">${q.marks}m</td>
+                    <td class="py-5 px-8">${papersHtml}</td>
+                    <td class="py-5 px-8">
+                        ${q.repetition >= 2
+                            ? `<span class="inline-flex items-center gap-1 bg-amber-400 text-black text-xs font-bold px-3 py-1 rounded-2xl"><i class="fa-solid fa-fire"></i>${q.repetition}</span>`
+                            : `<span class="text-gray-400 text-xs">1</span>`}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function toggleComplete(id, isChecked) {
+            const qs = getCurrentQuestions();
+            const question = qs.find(q => q.id === id);
+            if (question) {
+                question.completed = isChecked;
+                saveProgress();
+                calculateStats();
+                applyFilters();
+            }
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+            const moduleFilter = document.getElementById('module-filter').value;
+            const marksFilter = document.getElementById('marks-filter').value;
+            const paperFilter = document.getElementById('paper-filter').value;
+            const activeRepFilter = document.querySelector('.filter-btn.active').getAttribute('data-rep') || 'all';
+
+            let filtered = getCurrentQuestions().filter(q => {
+                const matchesSearch = !searchTerm || q.question.toLowerCase().includes(searchTerm);
+                const matchesModule = !moduleFilter || q.module.toString() === moduleFilter;
+                const matchesMarks = !marksFilter || q.marks.toString() === marksFilter;
+                const matchesPaper = !paperFilter || q.papers.some(p => (PAPER_LABELS[p] || p) === paperFilter);
+                let matchesRep = true;
+                if (activeRepFilter === '1') matchesRep = q.repetition === 1;
+                if (activeRepFilter === '2') matchesRep = q.repetition >= 2;
+                return matchesSearch && matchesModule && matchesMarks && matchesPaper && matchesRep;
+            });
+
+            renderTable(filtered);
+            document.getElementById('filtered-count').innerHTML = `Showing <span class="font-semibold text-white">${filtered.length}</span> of ${getCurrentQuestions().length} questions`;
+        }
+
+        function toggleRepetitionFilter(mode) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active', 'bg-amber-500/10', 'text-amber-400'));
+            if (mode === 0) document.getElementById('rep-all').classList.add('active');
+            else if (mode === 1) document.getElementById('rep-1').classList.add('active');
+            else if (mode === 2) document.getElementById('rep-2').classList.add('active', 'bg-amber-500/10', 'text-amber-400');
+            applyFilters();
+        }
+
+        function clearFilters() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('module-filter').value = '';
+            document.getElementById('marks-filter').value = '';
+            document.getElementById('paper-filter').value = '';
+            toggleRepetitionFilter(0);
+            applyFilters();
+        }
+
+        function resetAllProgress() {
+            if (confirm('Reset ALL progress for Theory, Numerical and Derivation questions?')) {
+                theoryQuestions.forEach(q => q.completed = false);
+                numericalQuestions.forEach(q => q.completed = false);
+                derivationQuestions.forEach(q => q.completed = false);
+                localStorage.removeItem('ect416_theory_progress');
+                localStorage.removeItem('ect416_numerical_progress');
+                localStorage.removeItem('ect416_derivation_progress');
+                calculateStats();
+                applyFilters();
+            }
+        }
+
+        function switchTab(tabIndex) {
+            currentTab = tabIndex;
+            // Update active tab UI
+            document.getElementById('tab-0').classList.toggle('tab-active', tabIndex === 0);
+            document.getElementById('tab-1').classList.toggle('tab-active', tabIndex === 1);
+            document.getElementById('tab-2').classList.toggle('tab-active', tabIndex === 2);
+            
+            loadProgress();
+            calculateStats();
+            renderTable(getCurrentQuestions());
+            applyFilters();
+        }
+
+        // ====================== INITIALIZE ======================
+        function initializeApp() {
+            // Set data attributes for repetition filter buttons
+            document.getElementById('rep-all').setAttribute('data-rep', 'all');
+            document.getElementById('rep-1').setAttribute('data-rep', '1');
+            document.getElementById('rep-2').setAttribute('data-rep', '2');
+
+            loadProgress();
+            calculateStats();
+            renderTable(theoryQuestions);
+            applyFilters();
+
+            console.log('%c✅ ECT416 Full Study Planner loaded successfully (Theory + Numerical + Derivation • Repeated & reworded questions labeled)', 'color:#00d4ff; font-family:monospace; font-size:13px');
+        }
+
+        window.onload = initializeApp;
+    </script>
+</body>
+</html>
