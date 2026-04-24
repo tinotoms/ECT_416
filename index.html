@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
-        
+       
         body { font-family: 'Inter', system_ui, sans-serif; }
         .title-font { font-family: 'Space Grotesk', sans-serif; }
         .table-row {
@@ -57,7 +57,7 @@
                     ECT416 Modern Communication Systems
                 </h1>
                 <p class="text-xl text-gray-400 mt-1">Full Study Planner – Theory + Numerical + Derivations</p>
-                <p class="text-sm text-gray-500 mt-2">Based on complete question database • Repeated &amp; reworded questions clearly labeled • Auto-save progress</p>
+                <p class="text-sm text-gray-500 mt-2">All questions kept • Reworded/repeated questions clearly marked with <span class="inline-flex items-center gap-1 bg-amber-400 text-black text-xs font-bold px-3 py-1 rounded-2xl"><i class="fa-solid fa-fire"></i>Repeated</span> badge</p>
             </div>
             <button onclick="resetAllProgress()"
                     class="flex items-center gap-2 px-5 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-2xl text-sm font-medium transition-colors">
@@ -65,7 +65,6 @@
                 <span>Reset All Progress</span>
             </button>
         </div>
-
         <!-- TABS -->
         <div class="flex border-b border-gray-800 mb-6 overflow-x-auto">
             <button onclick="switchTab(0)" id="tab-0"
@@ -84,7 +83,6 @@
                 Derivation Questions
             </button>
         </div>
-
         <!-- DASHBOARD -->
         <div class="grid grid-cols-3 gap-4 mb-8" id="dashboard">
             <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6">
@@ -120,10 +118,9 @@
                     </div>
                     <i class="fa-solid fa-fire text-amber-400 text-4xl opacity-20"></i>
                 </div>
-                <p class="text-xs text-amber-400/80 mt-6">Repeated / reworded questions • Solve first</p>
+                <p class="text-xs text-amber-400/80 mt-6">Repeated / reworded questions marked with badge • Solve first</p>
             </div>
         </div>
-
         <!-- FILTERS -->
         <div class="bg-gray-900 border border-gray-800 rounded-3xl p-6 mb-8">
             <div class="flex flex-wrap gap-4 items-end">
@@ -184,7 +181,6 @@
                 <button onclick="clearFilters()" class="px-8 py-4 text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 rounded-2xl text-sm font-medium transition-colors">Clear Filters</button>
             </div>
         </div>
-
         <!-- TABLE -->
         <div class="bg-gray-900 border border-gray-800 rounded-3xl overflow-hidden">
             <table class="w-full" id="questions-table">
@@ -206,7 +202,7 @@
             <div class="flex items-center gap-6">
                 <div><i class="fa-solid fa-circle-check text-emerald-400"></i> <span id="completed-count">0</span> completed</div>
                 <div class="h-3 w-px bg-gray-700"></div>
-                <div>Progress saved automatically in your browser • Based on official ECT416 question database</div>
+                <div>Progress saved automatically in your browser • All reworded questions kept + marked with repeated badge</div>
             </div>
         </div>
     </div>
@@ -220,117 +216,102 @@
             "Sep25": "Sep 2025"
         };
 
-        // ====================== THEORY QUESTIONS (68 entries from DB) ======================
+        // ====================== HELPER: Handle marks that are arrays (merged questions with different mark values) ======================
+        const getMarks = (q) => Array.isArray(q.marks) ? Math.max(...q.marks) : q.marks;
+
+        // ====================== THEORY QUESTIONS (FULL ORIGINAL LIST - NO ERASING) ======================
         let theoryQuestions = [
+            // ── MODULE 1 ──────────────────────────────────────────────────────────────
             { id: 1, module: 1, marks: 3, part: "A", papers: ["Jun23"], repetition: 1, question: "Explain why OFDM is preferred over FDM in modern communication systems.", completed: false },
             { id: 2, module: 1, marks: 3, part: "A", papers: ["Jun23"], repetition: 1, question: "Explain how Doppler shift is an important consideration in the design and operation of modern wireless communication systems.", completed: false },
             { id: 3, module: 1, marks: 3, part: "A", papers: ["May24"], repetition: 1, question: "What is shadowing and how can it be modelled in mobile communication?", completed: false },
-            { id: 4, module: 1, marks: 3, part: "A", papers: ["May24"], repetition: 2, question: "List the benefits of a multi-carrier communication system over a single carrier communication system.", completed: false },
+            { id: 4, module: 1, marks: 3, part: "A", papers: ["May24", "Sep25"], repetition: 2, reworded: true, question: "List the benefits of a multi-carrier communication system over a single carrier communication system.", completed: false },
             { id: 5, module: 1, marks: 3, part: "A", papers: ["Apr25"], repetition: 1, question: "Define OFDM and explain its basic principle with the help of neat diagram.", completed: false },
             { id: 6, module: 1, marks: 3, part: "A", papers: ["Apr25"], repetition: 1, question: "Define path loss and mention factors affecting it.", completed: false },
             { id: 7, module: 1, marks: 3, part: "A", papers: ["Sep25"], repetition: 1, question: "Describe the different diversity techniques used to improve signal reliability.", completed: false },
-            { id: 8, module: 1, marks: 3, part: "A", papers: ["Sep25"], repetition: 2, question: "Explain the benefits of a multi-carrier communication system over a single carrier communication system.", completed: false },
-            { id: 9, module: 1, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "Draw and explain the OFDM architecture showing how OFDM modulation and demodulation works.", completed: false },
-            { id: 10, module: 1, marks: 7, part: "B", papers: ["Jun23","Apr25"], repetition: 2, question: "Draw and explain the SC-FDMA transmitter and receiver structure / schematic.", completed: false },
+            { id: 9, module: 1, marks: [7, 9], part: "B", papers: ["Jun23", "Sep25"], repetition: 2, reworded: true, question: "Draw and explain the block diagram of OFDM transmitter and receiver.", completed: false },
+            { id: 10, module: 1, marks: 7, part: "B", papers: ["Jun23", "Apr25"], repetition: 2, question: "Draw and explain the SC-FDMA transmitter and receiver structure / schematic.", completed: false },
             { id: 11, module: 1, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "What are the benefits of multicarrier transmission? Explain how the orthogonality of subcarriers is maintained in OFDM.", completed: false },
-            { id: 12, module: 1, marks: 7, part: "B", papers: ["May24","Apr25"], repetition: 2, question: "What is the cyclic prefix code? Why is it used in OFDM? / Draw and explain the OFDM architecture with Cyclic Prefix.", completed: false },
-            { id: 13, module: 1, marks: 7, part: "B", papers: ["May24","Sep25"], repetition: 2, question: "Explain PAPR in OFDM systems.", completed: false },
-            { id: 14, module: 1, marks: 7, part: "B", papers: ["May24","Apr25"], repetition: 2, question: "Classify the diversity used in wireless communication.", completed: false },
-            { id: 15, module: 1, marks: 9, part: "B", papers: ["Sep25"], repetition: 1, question: "Explain the block diagram of OFDM transmitter and receiver.", completed: false },
-            { id: 16, module: 1, marks: 5, part: "B", papers: ["Sep25"], repetition: 2, question: "Explain PAPR in OFDM systems.", completed: false },
-            { id: 17, module: 1, marks: 9, part: "B", papers: ["Sep25"], repetition: 1, question: "Describe free space propagation model in wireless communication.", completed: false },
+            { id: 12, module: 1, marks: 7, part: "B", papers: ["May24", "Apr25"], repetition: 2, question: "What is the cyclic prefix? Why is it used in OFDM? / Draw and explain the OFDM architecture with Cyclic Prefix.", completed: false },
+            { id: 13, module: 1, marks: [7, 5], part: "B", papers: ["May24", "Sep25"], repetition: 3, reworded: true, question: "Explain PAPR in OFDM systems.", completed: false },
+            { id: 14, module: 1, marks: 7, part: "B", papers: ["May24", "Apr25"], repetition: 2, question: "Classify the diversity techniques used in wireless communication.", completed: false },
+            { id: 17, module: 1, marks: 9, part: "B", papers: ["Sep25"], repetition: 1, question: "Describe the free space propagation model in wireless communication.", completed: false },
             { id: 18, module: 1, marks: 5, part: "B", papers: ["Sep25"], repetition: 1, question: "Explain OFDMA and describe its working principle.", completed: false },
-            { id: 19, module: 2, marks: 3, part: "A", papers: ["Jun23"], repetition: 1, question: "Explain what is millimetre wave communication and mention its advantages?", completed: false },
+            // ── MODULE 2 ──────────────────────────────────────────────────────────────
+            { id: 19, module: 2, marks: 3, part: "A", papers: ["Jun23"], repetition: 1, question: "Explain what is millimetre wave communication and mention its advantages.", completed: false },
             { id: 20, module: 2, marks: 3, part: "A", papers: ["Jun23"], repetition: 1, question: "Mention three 6G use cases and their technologies.", completed: false },
-            { id: 21, module: 2, marks: 3, part: "A", papers: ["May24"], repetition: 2, question: "List and explain any three characteristics of millimeter waves.", completed: false },
+            { id: 21, module: 2, marks: 3, part: "A", papers: ["May24", "Apr25"], repetition: 2, reworded: true, question: "List and explain any three characteristics of millimeter waves.", completed: false },
             { id: 22, module: 2, marks: 3, part: "A", papers: ["May24"], repetition: 1, question: "Discuss the major advantages and limitations of 6G Networks.", completed: false },
-            { id: 23, module: 2, marks: 3, part: "A", papers: ["Apr25"], repetition: 2, question: "List and explain any three characteristics of millimeter waves.", completed: false },
             { id: 24, module: 2, marks: 3, part: "A", papers: ["Apr25"], repetition: 1, question: "Explain 3GPP-LTE standard.", completed: false },
             { id: 25, module: 2, marks: 3, part: "A", papers: ["Sep25"], repetition: 1, question: "List the main challenges associated with utilizing a 60 GHz channel for millimeter-wave communication.", completed: false },
-            { id: 26, module: 2, marks: 3, part: "A", papers: ["Sep25"], repetition: 1, question: "(Implied in Sep25 Q13b) Explain various technologies in 6G network.", completed: false },
-            { id: 27, module: 2, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "Define IEEE 802.11. Write short notes on IEEE 802.11 standards (802.11a/b/g/n/ac/ax).", completed: false },
+            { id: 26, module: 2, marks: 3, part: "A", papers: ["Sep25"], repetition: 1, question: "Explain various technologies in 6G network.", completed: false },
+            { id: 27, module: 2, marks: [7, 7, 7, 9], part: "B", papers: ["Jun23", "May24", "Apr25", "Sep25"], repetition: 4, reworded: true, question: "Define IEEE 802.11. Write short notes on IEEE 802.11 standards (802.11a/b/g/n/ac/ax) and describe the system architecture.", completed: false },
             { id: 28, module: 2, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "Explain the HiperLAN technology and differentiate between HiperLAN type 1 and type 2.", completed: false },
             { id: 29, module: 2, marks: 6, part: "B", papers: ["Jun23"], repetition: 1, question: "Explain three indoor and outdoor applications of millimeter wave communication.", completed: false },
             { id: 30, module: 2, marks: 8, part: "B", papers: ["Jun23"], repetition: 1, question: "What are some potential applications for 60 GHz wireless communication? Mention challenges associated with implementing 60 GHz in real-world scenarios.", completed: false },
             { id: 31, module: 2, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Compare the characteristics of IEEE 802.15.1, IEEE 802.15.3 and IEEE 802.15.4 WPAN standards.", completed: false },
-            { id: 32, module: 2, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Explain the IEEE 802.11 standard for WLAN. Compare the features of various derivatives of IEEE 802.11 standard.", completed: false },
             { id: 33, module: 2, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Explain the features of all versions of HIPERLAN.", completed: false },
             { id: 34, module: 2, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "Explain IEEE 802.15.3 High-Rate WPAN and IEEE 802.15.4 Low-Rate WPAN.", completed: false },
-            { id: 35, module: 2, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "Define IEEE 802.11. Write short notes on each of the following IEEE 802.11 standards (802.11a/b/g/n/ac/ax).", completed: false },
             { id: 36, module: 2, marks: 8, part: "B", papers: ["Apr25"], repetition: 1, question: "Explain the architecture and working of WiMAX (IEEE 802.16a) technology.", completed: false },
             { id: 37, module: 2, marks: 6, part: "B", papers: ["Apr25"], repetition: 1, question: "Detail the applications and purposes of 6G technology.", completed: false },
-            { id: 38, module: 2, marks: 9, part: "B", papers: ["Sep25"], repetition: 1, question: "Describe IEEE 802.11 System Architecture in detail with neat diagram.", completed: false },
-            { id: 39, module: 2, marks: 5, part: "B", papers: ["Sep25"], repetition: 1, question: "Explain any three indoor and outdoor applications of millimeter wave communication. Explain various technologies in 6G network.", completed: false },
-            { id: 40, module: 2, marks: 9, part: "B", papers: ["Sep25"], repetition: 1, question: "Write notes on (i) WiFi (ii) Hiper LAN (iii) WiMAX.", completed: false },
-            { id: 41, module: 2, marks: 5, part: "B", papers: ["Sep25"], repetition: 1, question: "Explain the various technologies in 6G networks.", completed: false },
+            { id: 39, module: 2, marks: [5, 5], part: "B", papers: ["Sep25"], repetition: 2, reworded: true, question: "Explain any three indoor and outdoor applications of millimeter wave communication. Explain various technologies in 6G networks.", completed: false },
+            { id: 40, module: 2, marks: 9, part: "B", papers: ["Sep25"], repetition: 1, question: "Write notes on (i) WiFi (ii) HiperLAN (iii) WiMAX.", completed: false },
+            // ── MODULE 3 ──────────────────────────────────────────────────────────────
             { id: 42, module: 3, marks: 3, part: "A", papers: ["Jun23"], repetition: 1, question: "Compare the IoT connectivity technologies Zigbee and Wireless HART.", completed: false },
             { id: 43, module: 3, marks: 3, part: "A", papers: ["Jun23"], repetition: 1, question: "Differentiate between MQTT and CoAP protocols in IoT.", completed: false },
             { id: 44, module: 3, marks: 3, part: "A", papers: ["May24"], repetition: 1, question: "List and explain any three characteristics of IPv6.", completed: false },
-            { id: 45, module: 3, marks: 3, part: "A", papers: ["May24","Sep25"], repetition: 2, question: "Explain the request-response communication model used in IoT systems.", completed: false },
+            { id: 45, module: 3, marks: 3, part: "A", papers: ["May24", "Sep25"], repetition: 2, reworded: true, question: "Explain the request-response communication model used in IoT systems.", completed: false },
             { id: 46, module: 3, marks: 3, part: "A", papers: ["Apr25"], repetition: 1, question: "Define the Internet of Things (IoT) and explain any two of its key characteristics.", completed: false },
-            { id: 47, module: 3, marks: 3, part: "A", papers: ["Apr25"], repetition: 1, question: "What's the difference between active and passive RFID?", completed: false },
-            { id: 48, module: 3, marks: 3, part: "A", papers: ["Sep25"], repetition: 2, question: "Explain the request-response communication model used in IoT systems.", completed: false },
+            { id: 47, module: 3, marks: 3, part: "A", papers: ["Apr25"], repetition: 1, question: "What is the difference between active and passive RFID?", completed: false },
             { id: 49, module: 3, marks: 3, part: "A", papers: ["Sep25"], repetition: 1, question: "Explain the CoAP protocol and its role in enabling communication between IoT devices.", completed: false },
-            { id: 50, module: 3, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "Describe the architecture of healthcare IoT system with the help of a diagram.", completed: false },
+            { id: 50, module: 3, marks: 7, part: "B", papers: ["Jun23", "May24", "Apr25"], repetition: 3, reworded: true, question: "Describe the architecture of a healthcare IoT system with the help of a diagram.", completed: false },
             { id: 51, module: 3, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "Describe the infrastructure protocols IPv6 and 6LoWPAN. Also explain the difference between the two.", completed: false },
-            { id: 52, module: 3, marks: 8, part: "B", papers: ["Jun23"], repetition: 1, question: "What is the physical design of an IoT system and what are its key components, explain with a diagram.", completed: false },
+            { id: 52, module: 3, marks: [8, 6], part: "B", papers: ["Jun23", "Apr25"], repetition: 2, reworded: true, question: "What is the physical design of an IoT system and what are its key components? Explain with a diagram.", completed: false },
             { id: 53, module: 3, marks: 6, part: "B", papers: ["Jun23"], repetition: 1, question: "Explain the key enabling technologies that make IoT possible. How does cloud computing enable IoT devices to store, process, and analyze large amounts of data?", completed: false },
-            { id: 54, module: 3, marks: 7, part: "B", papers: ["May24","Apr25"], repetition: 2, question: "Briefly describe the architecture of healthcare IoT systems.", completed: false },
-            { id: 55, module: 3, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Explain cloud Computing. What are the service models and deployment models in cloud computing?", completed: false },
+            { id: 55, module: 3, marks: [7, 8, 9], part: "B", papers: ["May24", "Apr25", "Sep25"], repetition: 3, reworded: true, question: "Explain cloud computing. What are the service models and deployment models in cloud computing?", completed: false },
             { id: 56, module: 3, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Distinguish between the MQTT and CoAP communication protocols used in IoT systems.", completed: false },
             { id: 57, module: 3, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "With appropriate diagram, describe the architecture of the Vehicular IoT system.", completed: false },
             { id: 58, module: 3, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "Explain the principle of operation of MQTT data protocol employed in IoT networks.", completed: false },
-            { id: 59, module: 3, marks: 8, part: "B", papers: ["Apr25"], repetition: 1, question: "Explain cloud Computing. What are the service models in cloud computing?", completed: false },
-            { id: 60, module: 3, marks: 6, part: "B", papers: ["Apr25"], repetition: 1, question: "What is the physical design of an IoT system and what are its key components, explain with a diagram.", completed: false },
-            { id: 61, module: 3, marks: 9, part: "B", papers: ["Sep25"], repetition: 1, question: "Define cloud computing and explain the different service models and deployment models used in cloud computing.", completed: false },
             { id: 62, module: 3, marks: 5, part: "B", papers: ["Sep25"], repetition: 1, question: "Explain the Wireless HART protocol and its role in industrial IoT communication.", completed: false },
             { id: 63, module: 3, marks: 9, part: "B", papers: ["Sep25"], repetition: 1, question: "Explain various protocols used in IoT communication technologies.", completed: false },
             { id: 64, module: 3, marks: 5, part: "B", papers: ["Sep25"], repetition: 1, question: "Explain the LoRa technology and its role in IoT applications.", completed: false },
+            // ── MODULE 4 ──────────────────────────────────────────────────────────────
             { id: 65, module: 4, marks: 3, part: "A", papers: ["Jun23"], repetition: 1, question: "What are some potential drawbacks or limitations of DSRC?", completed: false },
             { id: 66, module: 4, marks: 3, part: "A", papers: ["Jun23"], repetition: 1, question: "Mention the advantages of VLC standard in vehicular communication.", completed: false },
             { id: 67, module: 4, marks: 3, part: "A", papers: ["May24"], repetition: 1, question: "List the major application areas and challenges of WAVE.", completed: false },
-            { id: 68, module: 4, marks: 3, part: "A", papers: ["May24","Apr25","Sep25"], repetition: 3, question: "Explain the DSRC standards for vehicular communication.", completed: false },
+            { id: 68, module: 4, marks: 3, part: "A", papers: ["May24", "Apr25", "Sep25"], repetition: 3, question: "Explain the DSRC standards for vehicular communication.", completed: false },
             { id: 69, module: 4, marks: 3, part: "A", papers: ["Apr25"], repetition: 1, question: "What is the Intelligent Transport System (ITS) and how does it revolutionize transportation?", completed: false },
-            { id: 70, module: 4, marks: 3, part: "A", papers: ["Sep25"], repetition: 1, question: "What are the advantages of the VLC standard over other communication standards in vehicular communication?", completed: false },
-            { id: 71, module: 4, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "Explain the architecture of connected autonomous vehicles in 6G with the help of a diagram.", completed: false },
-            { id: 72, module: 4, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "Explain what is IEEE 802.11p and how does it differ from other IEEE 802.11 wireless communication standards?", completed: false },
+            { id: 70, module: 4, marks: 3, part: "A", papers: ["Jun23", "Sep25"], repetition: 2, reworded: true, question: "What are the advantages of the VLC standard over other communication standards in vehicular communication?", completed: false },
+            { id: 71, module: 4, marks: 7, part: "B", papers: ["Jun23", "May24", "Apr25"], repetition: 3, reworded: true, question: "Explain the architecture and key components of connected autonomous vehicles (CAV) in 6G communications with the help of a diagram.", completed: false },
+            { id: 72, module: 4, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "Explain what is IEEE 802.11p and how does it differ from other IEEE 802.11 wireless communication standards.", completed: false },
             { id: 73, module: 4, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "What is Visible Light Communication (VLC)? Explain various applications of VLC technology in vehicular communication.", completed: false },
-            { id: 74, module: 4, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "What are the benefits of CAVs? Describe how collision avoidance can be achieved through vehicular communication.", completed: false },
-            { id: 75, module: 4, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Describe how collision avoidance can be achieved through vehicular communication.", completed: false },
+            { id: 74, module: 4, marks: [7, 7, 7, 5], part: "B", papers: ["Jun23", "May24", "Apr25", "Sep25"], repetition: 4, reworded: true, question: "With the help of necessary diagrams, describe how collision avoidance can be achieved through vehicular communication.", completed: false },
             { id: 76, module: 4, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Explain the main advantages and limitations of IEEE 802.11p standard compared to cellular communication in connected autonomous vehicles.", completed: false },
-            { id: 77, module: 4, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "With the help of a diagram, explain the architecture of ITS system utilizing VLC standard for V2X communication.", completed: false },
-            { id: 78, module: 4, marks: 7, part: "B", papers: ["May24","Apr25"], repetition: 2, question: "Explain the key components of connected autonomous vehicles in 6G communications with the help of a diagram.", completed: false },
+            { id: 77, module: 4, marks: [7, 9], part: "B", papers: ["May24", "Sep25"], repetition: 2, reworded: true, question: "With the help of a diagram, explain the architecture of ITS system utilizing VLC standard for V2X communication.", completed: false },
             { id: 79, module: 4, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "Explain IEEE 1609 standard and its sub-variants used in vehicular communication.", completed: false },
-            { id: 80, module: 4, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "With the help of necessary figures, describe how collision avoidance can be achieved through vehicular communication.", completed: false },
-            { id: 81, module: 4, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "Explain the architecture of connected autonomous vehicles in 6G with the help of a diagram.", completed: false },
             { id: 82, module: 4, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "Discuss Dedicated Short-Range Communication (DSRC) in vehicular networks. List out its advantages and disadvantages.", completed: false },
             { id: 83, module: 4, marks: 9, part: "B", papers: ["Sep25"], repetition: 1, question: "Explain the IEEE 1609 standard and its role in vehicular communication systems. Include relevant diagrams.", completed: false },
-            { id: 84, module: 4, marks: 5, part: "B", papers: ["Sep25"], repetition: 1, question: "With the help of necessary diagrams, explain how collision avoidance can be achieved through vehicular communication.", completed: false },
-            { id: 85, module: 4, marks: 9, part: "B", papers: ["Sep25"], repetition: 1, question: "With the help of necessary diagrams, explain the architecture of ITS system utilizing VLC standard for V2X communication.", completed: false },
             { id: 86, module: 4, marks: 5, part: "B", papers: ["Sep25"], repetition: 1, question: "List and explain any five advantages of Visible Light Communication (VLC).", completed: false },
-            { id: 87, module: 5, marks: 3, part: "A", papers: ["Jun23","Apr25","Sep25"], repetition: 3, question: "What are the specifications of a receiver in SDR?", completed: false },
+            // ── MODULE 5 ──────────────────────────────────────────────────────────────
+            { id: 87, module: 5, marks: 3, part: "A", papers: ["Jun23", "Apr25", "Sep25"], repetition: 3, reworded: true, question: "What are the specifications of a receiver in SDR? List and explain any six key receiver specifications.", completed: false },
             { id: 88, module: 5, marks: 3, part: "A", papers: ["Jun23"], repetition: 1, question: "What are the basic components of an SDR system?", completed: false },
             { id: 89, module: 5, marks: 3, part: "A", papers: ["May24"], repetition: 1, question: "Explain the issues with zero IF receiver architecture for Software Defined Radio.", completed: false },
-            { id: 90, module: 5, marks: 3, part: "A", papers: ["May24","Apr25","Sep25"], repetition: 3, question: "Define cognitive radio and explain its significance / list its benefits.", completed: false },
-            { id: 91, module: 5, marks: 3, part: "A", papers: ["Sep25"], repetition: 1, question: "List and explain any six key receiver specifications of a Software-Defined Radio (SDR).", completed: false },
-            { id: 92, module: 5, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "What are some common applications of SDR systems, and how does the use of SDR enable greater flexibility in communication systems?", completed: false },
+            { id: 90, module: 5, marks: 3, part: "A", papers: ["May24", "Apr25", "Sep25"], repetition: 3, question: "Define cognitive radio and explain its significance / list its benefits.", completed: false },
+            { id: 92, module: 5, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "What are some common applications of SDR systems, and how does SDR enable greater flexibility in communication systems?", completed: false },
             { id: 93, module: 5, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "Explain the concept of cognitive radio. What are the benefits of spectrum sharing in cognitive radio?", completed: false },
             { id: 94, module: 5, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "How does a software radio architecture work, and what are its components?", completed: false },
             { id: 95, module: 5, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "What are the key features and benefits of cognitive radio technology? How does spectrum subleasing work in cognitive radio networks?", completed: false },
-            { id: 96, module: 5, marks: 7, part: "B", papers: ["May24","Apr25"], repetition: 2, question: "Describe spectrum subleasing and sharing in cognitive radio.", completed: false },
+            { id: 96, module: 5, marks: [7, 7, 9], part: "B", papers: ["May24", "Apr25", "Sep25"], repetition: 3, reworded: true, question: "Describe spectrum subleasing and spectrum sharing in cognitive radio.", completed: false },
             { id: 97, module: 5, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "List and explain the main specifications for SDR transmitter and receiver.", completed: false },
-            { id: 98, module: 5, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "With the help of necessary diagram, explain the low IF receiver architecture for SDR.", completed: false },
+            { id: 98, module: 5, marks: [7, 5], part: "B", papers: ["May24", "Sep25"], repetition: 2, reworded: true, question: "With the help of necessary diagram, explain the low IF receiver architecture for SDR.", completed: false },
             { id: 99, module: 5, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Discuss the functions of software adaptable networks (SAN) in cognitive networks.", completed: false },
             { id: 100, module: 5, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "Discuss the architecture of SDR with a suitable block diagram.", completed: false },
-            { id: 101, module: 5, marks: 7, part: "B", papers: ["Apr25"], repetition: 2, question: "Describe spectrum subleasing and sharing in cognitive radio.", completed: false },
-            { id: 102, module: 5, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "List and explain the advantages and disadvantages of direct Conversion architectures for SDR receiver.", completed: false },
-            { id: 103, module: 5, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "Briefly explain the Multiple conversion receiver architecture for SDR.", completed: false },
-            { id: 104, module: 5, marks: 14, part: "B", papers: ["Sep25"], repetition: 1, question: "Explain the block diagram of the transmitter and receiver sections of a Software-Defined Radio (SDR).", completed: false },
-            { id: 105, module: 5, marks: 9, part: "B", papers: ["Sep25"], repetition: 2, question: "Describe spectrum subleasing and spectrum sharing in cognitive radio.", completed: false },
-            { id: 106, module: 5, marks: 5, part: "B", papers: ["Sep25"], repetition: 1, question: "With the help of necessary diagram, explain the low IF receiver architecture for SDR.", completed: false }
+            { id: 102, module: 5, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "List and explain the advantages and disadvantages of direct conversion architectures for SDR receiver.", completed: false },
+            { id: 103, module: 5, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "Briefly explain the multiple conversion receiver architecture for SDR.", completed: false },
+            { id: 104, module: 5, marks: 14, part: "B", papers: ["Sep25"], repetition: 1, question: "Explain the block diagram of the transmitter and receiver sections of a Software-Defined Radio (SDR).", completed: false }
         ];
 
-        // ====================== NUMERICAL QUESTIONS (4 entries from DB) ======================
+        // ====================== NUMERICAL QUESTIONS ======================
         let numericalQuestions = [
             { id: 201, module: 1, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Determine the speed of a vehicle approaching an antenna if it experiences a maximum Doppler frequency shift of 70 Hz at 900 MHz.", completed: false },
             { id: 202, module: 1, marks: 7, part: "B", papers: ["Apr25"], repetition: 1, question: "A mobile subscriber travels at 60 km/h. Compute the time between fades for a cellphone at 900 MHz and a PCS phone at 1900 MHz.", completed: false },
@@ -338,12 +319,12 @@
             { id: 204, module: 2, marks: 7, part: "B", papers: ["May24"], repetition: 1, question: "Using Friis free space equation, compare the path loss at 500 meters for carrier frequencies of 1.8 GHz and 2.4 GHz.", completed: false }
         ];
 
-        // ====================== DERIVATION QUESTIONS (1 entry from DB) ======================
+        // ====================== DERIVATION QUESTIONS ======================
         let derivationQuestions = [
             { id: 301, module: 1, marks: 7, part: "B", papers: ["Jun23"], repetition: 1, question: "Explain the concept of two ray ground reflection model and derive an expression for the total electric field of the two rays.", completed: false }
         ];
 
-        let currentTab = 0; // 0 = Theory, 1 = Numerical, 2 = Derivation
+        let currentTab = 0;
 
         function getCurrentQuestions() {
             if (currentTab === 0) return theoryQuestions;
@@ -370,8 +351,8 @@
             const qs = getCurrentQuestions();
             const completed = qs.filter(q => q.completed);
             const totalCompleted = completed.length;
-            const totalCompletedMarks = completed.reduce((sum, q) => sum + q.marks, 0);
-            const totalMarks = qs.reduce((sum, q) => sum + q.marks, 0);
+            const totalCompletedMarks = completed.reduce((sum, q) => sum + getMarks(q), 0);
+            const totalMarks = qs.reduce((sum, q) => sum + getMarks(q), 0);
             const progress = Math.round((totalCompleted / qs.length) * 100) || 0;
 
             document.getElementById('total-questions').textContent = qs.length;
@@ -381,13 +362,8 @@
             document.getElementById('marks-completed').innerHTML = `<span class="font-semibold">${totalCompletedMarks}</span> / ${totalMarks} marks completed`;
             document.getElementById('completed-count').textContent = totalCompleted;
 
-            // High priority = repeated (rep >= 2)
             const highPriority = qs.filter(q => q.repetition >= 2).length;
             document.getElementById('high-priority-count').textContent = highPriority;
-
-            // Update dashboard title
-            const titles = ["Total Theory Questions", "Total Numerical Questions", "Total Derivation Questions"];
-            document.getElementById('dashboard-title').textContent = titles[currentTab];
         }
 
         function renderTable(filteredQuestions) {
@@ -402,6 +378,7 @@
                     const label = PAPER_LABELS[p] || p;
                     return `<span class="paper-tag">${label}</span>`;
                 }).join('');
+
                 const row = document.createElement('tr');
                 row.className = `table-row ${q.completed ? 'completed' : ''}`;
                 row.innerHTML = `
@@ -415,7 +392,7 @@
                         </div>
                     </td>
                     <td class="py-5 px-8 font-medium">Module ${q.module}</td>
-                    <td class="py-5 px-8 font-semibold text-[#00d4ff]">${q.marks}m</td>
+                    <td class="py-5 px-8 font-semibold text-[#00d4ff]">${getMarks(q)}m</td>
                     <td class="py-5 px-8">${papersHtml}</td>
                     <td class="py-5 px-8">
                         ${q.repetition >= 2
@@ -448,7 +425,7 @@
             let filtered = getCurrentQuestions().filter(q => {
                 const matchesSearch = !searchTerm || q.question.toLowerCase().includes(searchTerm);
                 const matchesModule = !moduleFilter || q.module.toString() === moduleFilter;
-                const matchesMarks = !marksFilter || q.marks.toString() === marksFilter;
+                const matchesMarks = !marksFilter || getMarks(q).toString() === marksFilter;
                 const matchesPaper = !paperFilter || q.papers.some(p => (PAPER_LABELS[p] || p) === paperFilter);
                 let matchesRep = true;
                 if (activeRepFilter === '1') matchesRep = q.repetition === 1;
@@ -492,7 +469,6 @@
 
         function switchTab(tabIndex) {
             currentTab = tabIndex;
-            // Update active tab UI
             document.getElementById('tab-0').classList.toggle('tab-active', tabIndex === 0);
             document.getElementById('tab-1').classList.toggle('tab-active', tabIndex === 1);
             document.getElementById('tab-2').classList.toggle('tab-active', tabIndex === 2);
@@ -503,19 +479,15 @@
             applyFilters();
         }
 
-        // ====================== INITIALIZE ======================
         function initializeApp() {
-            // Set data attributes for repetition filter buttons
             document.getElementById('rep-all').setAttribute('data-rep', 'all');
             document.getElementById('rep-1').setAttribute('data-rep', '1');
             document.getElementById('rep-2').setAttribute('data-rep', '2');
-
             loadProgress();
             calculateStats();
             renderTable(theoryQuestions);
             applyFilters();
-
-            console.log('%c✅ ECT416 Full Study Planner loaded successfully (Theory + Numerical + Derivation • Repeated & reworded questions labeled)', 'color:#00d4ff; font-family:monospace; font-size:13px');
+            console.log('%c✅ ECT416 Study Planner loaded with ALL questions + repeated badge on reworded ones', 'color:#00d4ff; font-family:monospace; font-size:13px');
         }
 
         window.onload = initializeApp;
